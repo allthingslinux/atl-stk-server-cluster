@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  stk-server1:
+    build:
+      context: .
+      dockerfile: dockerfile.stk
+    ports:
+      - "5001:2759"
+    networks:
+      - stk-network
+
+  stk-server2:
+    build:
+      context: .
+      dockerfile: dockerfile.stk
+    ports:
+      - "5002:2759"
+    networks:
+      - stk-network
+
+  stk-server3:
+    build:
+      context: .
+      dockerfile: dockerfile.stk
+    ports:
+      - "5003:2759"
+    networks:
+      - stk-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: dockerfile.nginx
+    ports:
+      - "2759:2759"
+      - "9999:9999"
+    networks:
+      - stk-network
+
+networks:
+  stk-network:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: "2001:db8::/64"  # Example IPv6 subnet

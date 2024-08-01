@@ -1,0 +1,44 @@
+# Use an appropriate base image
+FROM ubuntu:latest
+
+# Install necessary packages and dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    unzip \
+    libbluetooth-dev \
+    libsdl2-dev \
+    libcurl4-openssl-dev \
+    libenet-dev \
+    libfreetype6-dev \
+    libharfbuzz-dev \
+    libjpeg-dev \
+    libogg-dev \
+    libopenal-dev \
+    libpng-dev \
+    libssl-dev \
+    libvorbis-dev \
+    pkg-config \
+    subversion \
+    zlib1g-dev 
+
+# Clone SuperTuxKart source code
+RUN git clone --branch command-manager-prototype https://github.com/kimden/stk-code.git /opt/stk-code
+
+# Download and extract SuperTuxKart assets
+COPY stk-assets /usr/local/share/supertuxkart/data/
+COPY bans.db /usr/local/share/supertuxkart/server_data/bans.db
+COPY server_config.xml /usr/local/share/supertuxkart/server_data/server_config.xml
+
+# Build SuperTuxKart with server support
+RUN mkdir -p /opt/stk-code/cmake_build && \
+    cd /opt/stk-code/cmake_build && \
+    cmake .. -DSERVER_ONLY=on -DCHECK_ASSETS=off && \
+    make -j$(nproc) && \
+    make install
+
+CMD ["sh", "-c", "supertuxkart --init-user --login=\"\" --password=\"\" && supertuxkart --server-config=/usr/local/share/supertuxkart/server_data/server_config.xml --network-console"]
+
+
